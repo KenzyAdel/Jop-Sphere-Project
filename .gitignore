@@ -1,0 +1,43 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.keystore
+*.jks
+
+# Flutter
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+flutter_export_environment.sh
+
+# General
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+/.settings
+/.project
+/.classpath
+
+# Local configuration files
+local.properties
+flutter_local_config.sh
