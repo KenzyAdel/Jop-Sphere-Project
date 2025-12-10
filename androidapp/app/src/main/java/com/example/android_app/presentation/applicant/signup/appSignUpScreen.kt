@@ -43,7 +43,7 @@ fun ApplicantSignUpScreen(
         onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
         onPhoneChange = viewModel::onPhoneChange,
         onLinkedInChange = viewModel::onLinkedInChange,
-        onPortfolioChange = viewModel::onPortfolioChange,
+        onCVLinkChange = viewModel::onCVLinkChange,
         onSignUpClick = viewModel::onSignUpClick,
         onNavigateToLogin = onNavigateToLogin
     )
@@ -58,7 +58,7 @@ private fun ApplicantSignUpContent(
     onConfirmPasswordChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onLinkedInChange: (String) -> Unit,
-    onPortfolioChange: (String) -> Unit,
+    onCVLinkChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
@@ -153,9 +153,9 @@ private fun ApplicantSignUpContent(
 
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
-                value = uiState.portfolio,
-                onValueChange = onPortfolioChange,
-                label = { Text("Portfolio (Optional)") },
+                value = uiState.CVLink,
+                onValueChange = onCVLinkChange,
+                label = { Text("CV Link") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -212,7 +212,7 @@ fun ApplicantSignUpScreenPreview() {
             onConfirmPasswordChange = {},
             onPhoneChange = {},
             onLinkedInChange = {},
-            onPortfolioChange = {},
+            onCVLinkChange = {},
             onSignUpClick = {},
             onNavigateToLogin = {}
         )

@@ -30,7 +30,6 @@ class FirebaseQuickStartExamples : ViewModel() {
                 cvLink = "https://example.com/john-cv.pdf",
                 email = "john.doe@email.com",
                 linkedin = "https://linkedin.com/in/johndoe",
-                password = "securePassword123",
                 phone = "+1234567890"
             )
             
@@ -51,7 +50,7 @@ class FirebaseQuickStartExamples : ViewModel() {
         viewModelScope.launch {
             firebase.applicants.getApplicantByEmail(email)
                 .onSuccess { applicant ->
-                    if (applicant != null && applicant.password == password) {
+                    if (applicant != null ) {
                         println("✅ Login successful! Welcome ${applicant.email}")
                         // Navigate to applicant dashboard
                     } else {
@@ -97,7 +96,6 @@ class FirebaseQuickStartExamples : ViewModel() {
                 industry = "Technology",
                 linkedin = "https://linkedin.com/company/techcorp",
                 name = "Tech Corp Inc.",
-                password = "companyPassword123",
                 phone = "+1-555-0100",
                 website = "https://techcorp.com"
             )

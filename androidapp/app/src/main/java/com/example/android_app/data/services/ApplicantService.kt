@@ -9,10 +9,10 @@ class ApplicantService {
     private val collection = db.collection("Applicant")
 
     // CREATE - Add a new applicant
-    suspend fun createApplicant(applicant: Applicant): Result<String> {
+    suspend fun createApplicant(applicant: Applicant): Result<Unit> {
         return try {
-            val docRef = collection.add(applicant.toHashMap()).await()
-            Result.success(docRef.id)
+            collection.document(applicant.id).set(applicant.toHashMap()).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

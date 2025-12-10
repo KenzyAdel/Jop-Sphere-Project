@@ -9,10 +9,10 @@ class CompanyService {
     private val collection = db.collection("Company")
 
     // CREATE - Add a new company
-    suspend fun createCompany(company: Company): Result<String> {
+    suspend fun createCompany(company: Company): Result<Unit> {
         return try {
-            val docRef = collection.add(company.toHashMap()).await()
-            Result.success(docRef.id)
+            collection.document(company.id).set(company.toHashMap()).await()
+            Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }

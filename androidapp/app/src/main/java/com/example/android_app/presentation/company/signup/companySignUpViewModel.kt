@@ -75,36 +75,50 @@ class companySignUpViewModel : ViewModel() {
         }
 
         // 2. Perform Firebase Registration
+        // Inside companySignUpViewModel.kt
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, signUpError = null) }
 
             try {
-                // Step 1: Create the user account using the service
+                // Step 1: Create the user account
                 val user = auth.createUserWithEmailAndPassword(state.email, state.password).await()
-                // Step 3: Create the Company object with the new user's UID
+                val userId = user.user?.uid
+
+                if (userId == null) {
+                    throw IllegalStateException("Firebase user creation failed: UID not found.")
+                }
+
+                // Step 3: Create the Company object
                 val company = Company(
                     name = state.companyName,
                     email = state.email,
                     website = state.website,
                     phone = state.phone,
                     industry = state.industry,
-                    linkedin = state.linkedIn
+                    linkedin = state.linkedIn,
+                    id = userId
                 )
 
-                // Step 4: Save the company data to Firestore using the service
-                companyService.createCompany(company)
+                // Step 4: Save to Firestore AND CHECK THE RESULT
+                val result = companyService.createCompany(company)
 
-                // Step 5: Update UI to reflect success
-                _uiState.update { it.copy(isLoading = false, isSignUpSuccess = true) }
+                result.onSuccess {
+                    // Step 5: Update UI only on success
+                    _uiState.update { it.copy(isLoading = false, isSignUpSuccess = true) }
+                }.onFailure { exception ->
+                    // If Firestore fails, throw the exception so the catch block below handles it
+                    throw exception
+                }
 
             } catch (e: Exception) {
-                // Handle any errors from the service calls
+                // Now this will actually catch Firestore errors
                 val errorMsg = when (e) {
                     is FirebaseAuthUserCollisionException -> "An account with this email already exists."
                     else -> e.message ?: "Sign up failed. Please try again."
                 }
                 _uiState.update { it.copy(isLoading = false, signUpError = errorMsg) }
             }
-                }
+        }
         }
 }
