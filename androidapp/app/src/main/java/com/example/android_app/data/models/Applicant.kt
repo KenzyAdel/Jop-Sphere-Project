@@ -5,8 +5,8 @@ data class Applicant(
     val cvLink: String = "",
     val email: String = "",
     val linkedin: String = "",
-    val password: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    val name: String = ""
 ) {
     // Convert to HashMap for Firestore
     fun toHashMap(): HashMap<String, Any> {
@@ -14,8 +14,8 @@ data class Applicant(
             "CV-Link" to cvLink,
             "Email" to email,
             "Linkedin" to linkedin,
-            "Password" to password,
-            "Phone" to phone
+            "Phone" to phone,
+            "Name" to name
         )
     }
 
@@ -27,8 +27,8 @@ data class Applicant(
                 cvLink = data["CV-Link"] as? String ?: "",
                 email = data["Email"] as? String ?: "",
                 linkedin = data["Linkedin"] as? String ?: "",
-                password = data["Password"] as? String ?: "",
-                phone = data["Phone"] as? String ?: ""
+                phone = data["Phone"] as? String ?: "",
+                name = data["Name"] as? String ?: ""
             )
         }
     }

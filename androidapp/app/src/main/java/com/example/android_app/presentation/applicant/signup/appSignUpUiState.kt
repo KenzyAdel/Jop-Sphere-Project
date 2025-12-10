@@ -8,7 +8,7 @@ data class AppSignUpUiState(
     // Optional fields
     val phone: String = "",
     val linkedIn: String = "",
-    val portfolio: String = "",
+    val CVLink: String = "",
     val isLoading: Boolean = false,
     val signUpError: String? = null,
     val isSignUpSuccess: Boolean = false

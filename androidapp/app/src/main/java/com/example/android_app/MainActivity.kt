@@ -6,14 +6,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.android_app.presentation.company.signup.CompanySignUpScreen
+import com.example.android_app.presentation.applicant.signup.ApplicantSignUpScreen// 1. Import the sign-up screen
+import com.example.android_app.presentation.authentication.login.LoginScreen
 import com.example.android_app.ui.theme.AndroidappTheme
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
@@ -21,27 +19,31 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // This is good for initial testing, you can keep or remove it
         try {
-            val auth = Firebase.auth
+            Firebase.auth
             Log.d("FirebaseTest", "✅ Firebase initialized successfully!")
-            Log.d("FirebaseTest", "Auth instance: $auth")
         } catch (e: Exception) {
             Log.e("FirebaseTest", "❌ Firebase initialization failed: ${e.message}")
         }
+
         enableEdgeToEdge()
         setContent {
             AndroidappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                // Use a Surface for better background color handling
+                Surface(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // 2. Set your companySignUpScreen as the content
+                    LoginScreen()
                 }
             }
         }
     }
 }
 
+// You can now remove the Greeting and GreetingPreview functions as they are no longer used.
+/*
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
@@ -57,3 +59,4 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+*/

@@ -6,7 +6,6 @@ data class Company(
     val industry: String = "",
     val linkedin: String = "",
     val name: String = "",
-    val password: String = "",
     val phone: String = "",
     val website: String = ""
 ) {
@@ -17,7 +16,6 @@ data class Company(
             "Industry" to industry,
             "Linkedin" to linkedin,
             "Name" to name,
-            "Password" to password,
             "Phone" to phone,
             "Website" to website
         )
@@ -32,7 +30,6 @@ data class Company(
                 industry = data["Industry"] as? String ?: "",
                 linkedin = data["Linkedin"] as? String ?: "",
                 name = data["Name"] as? String ?: "",
-                password = data["Password"] as? String ?: "",
                 phone = data["Phone"] as? String ?: "",
                 website = data["Website"] as? String ?: ""
             )

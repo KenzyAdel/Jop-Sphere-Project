@@ -35,10 +35,19 @@ fun ApplicantSignUpScreen(
         }
     }
 
-    // Optional fields
-    var phone by remember { mutableStateOf("") }
-    var linkedIn by remember { mutableStateOf("") }
-    var CV by remember { mutableStateOf("") }
+    ApplicantSignUpContent(
+        uiState = uiState,
+        onFullNameChange = viewModel::onFullNameChange,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+        onPhoneChange = viewModel::onPhoneChange,
+        onLinkedInChange = viewModel::onLinkedInChange,
+        onCVLinkChange = viewModel::onCVLinkChange,
+        onSignUpClick = viewModel::onSignUpClick,
+        onNavigateToLogin = onNavigateToLogin
+    )
+}
 
 @Composable
 private fun ApplicantSignUpContent(
@@ -49,7 +58,7 @@ private fun ApplicantSignUpContent(
     onConfirmPasswordChange: (String) -> Unit,
     onPhoneChange: (String) -> Unit,
     onLinkedInChange: (String) -> Unit,
-    onPortfolioChange: (String) -> Unit,
+    onCVLinkChange: (String) -> Unit,
     onSignUpClick: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
@@ -153,6 +162,25 @@ private fun ApplicantSignUpContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = uiState.CVLink,
+                onValueChange = onCVLinkChange,
+                label = { Text("CV Link") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // --- Error Message ---
+            if (uiState.signUpError != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = uiState.signUpError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
@@ -201,7 +229,7 @@ fun ApplicantSignUpScreenPreview() {
             onConfirmPasswordChange = {},
             onPhoneChange = {},
             onLinkedInChange = {},
-            onPortfolioChange = {},
+            onCVLinkChange = {},
             onSignUpClick = {},
             onNavigateToLogin = {}
         )
