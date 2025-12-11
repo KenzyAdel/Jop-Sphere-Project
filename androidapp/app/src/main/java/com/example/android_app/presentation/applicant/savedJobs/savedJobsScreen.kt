@@ -9,6 +9,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -16,22 +18,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// Model (you can replace this with your actual Job model)
-data class SavedJob(
-    val title: String,
-    val company: String,
-    val location: String,
-    val salary: String,
-    val jobType: String
-)
+import com.example.android_app.data.entities.SavedJobsEntity
 
 @Composable
 fun SavedJobsScreen(
-    savedJobs: List<SavedJob>,
-    onBackClick: () -> Unit = {},
-    onApplyClick: (SavedJob) -> Unit = {},
-    onRemoveClick: (SavedJob) -> Unit = {}
+    uiState: savedJobsUiState,
+    onBackClick: () -> Unit,
+    onApplyClick: (SavedJobsEntity) -> Unit,
+    onRemoveClick: (SavedJobsEntity) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -43,7 +37,7 @@ fun SavedJobsScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF6A1B9A)) // Purple header
+                .background(Color(0xFF6A1B9A))
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -65,14 +59,15 @@ fun SavedJobsScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // EMPTY STATE
-        if (savedJobs.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+            return
+        }
+
+        if (uiState.savedJobs.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "You have no saved jobs yet.",
                     fontSize = 18.sp,
@@ -83,13 +78,12 @@ fun SavedJobsScreen(
             return
         }
 
-        // JOB LIST
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(savedJobs) { job ->
+            items(uiState.savedJobs) { job ->
                 SavedJobCard(
                     job = job,
                     onApplyClick = { onApplyClick(job) },
@@ -102,7 +96,7 @@ fun SavedJobsScreen(
 
 @Composable
 fun SavedJobCard(
-    job: SavedJob,
+    job: SavedJobsEntity,
     onApplyClick: () -> Unit,
     onRemoveClick: () -> Unit
 ) {
@@ -151,19 +145,20 @@ fun SavedJobCard(
         }
     }
 }
-
 @Preview(showBackground = true)
 @Composable
-fun SavedJobsPreview() {
+fun SavedJobsScreenPreview() {
     val sampleJobs = listOf(
-        SavedJob(
+        SavedJobsEntity(
+            id = "job1",
             title = "Android Developer",
             company = "Tech Corp",
             location = "Remote",
             salary = "$60,000",
             jobType = "Full Time"
         ),
-        SavedJob(
+        SavedJobsEntity(
+            id = "job2",
             title = "Junior Kotlin Developer",
             company = "Soft Solutions",
             location = "New York, USA",
@@ -172,7 +167,10 @@ fun SavedJobsPreview() {
         )
     )
 
-    MaterialTheme {
-        SavedJobsScreen(savedJobs = sampleJobs)
-    }
+    SavedJobsScreen(
+        uiState = savedJobsUiState(isLoading = false, savedJobs = sampleJobs),
+        onBackClick = {},
+        onApplyClick = {},
+        onRemoveClick = {}
+    )
 }
