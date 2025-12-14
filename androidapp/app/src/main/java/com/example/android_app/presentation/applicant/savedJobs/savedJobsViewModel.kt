@@ -8,7 +8,6 @@ import com.example.android_app.data.repositories.SavedJobRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class savedJobsViewModel(

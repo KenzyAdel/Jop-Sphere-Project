@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "saved_jobs_table")
 data class SavedJobsEntity(
     @PrimaryKey
-    val id: String, // Matches the Firebase Document ID
+    val id: String,
     val title: String,
     val company: String,
     val location: String,
