@@ -7,9 +7,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,13 +18,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.android_app.data.models.Job
+
+// ----------------------------
+// ROUTE COMPOSABLE (Entry Point)
+// ----------------------------
+@Composable
+fun CompanyHomeRoute(
+    viewModel: CompanyHomeViewModel = viewModel(),
+    onLogout: () -> Unit = {},
+    onAddJob: () -> Unit = {},
+    onViewApplicants: (String) -> Unit = {}
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadJobs()
+    }
+
+    CompanyHomeScreen(
+        uiState = uiState,
+        onLogout = {
+            viewModel.logout()
+            onLogout()
+        },
+        onAddJob = onAddJob,
+        onDeleteJob = { jobId -> viewModel.deleteJob(jobId) },
+        onViewApplicants = onViewApplicants,
+        onRefresh = { viewModel.loadJobs() } // Optional: Pull to refresh logic could use this
+    )
+}
 
 // ----------------------------
 // TOP BAR with Back Button
 // ----------------------------
 @Composable
 fun CompanyHomeTopBar(
-    onBack: () -> Unit = {}
+    onLogout: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
@@ -35,16 +65,19 @@ fun CompanyHomeTopBar(
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
-        }
-        Spacer(Modifier.width(8.dp))
         Text(
             text = "Company Dashboard",
             color = Color.White,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold
         )
+        Spacer(Modifier.weight(1f))
+        Button(
+            onClick = onLogout,
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))
+        ) {
+            Text("Logout", color = Color.White)
+        }
     }
 }
 
@@ -53,18 +86,16 @@ fun CompanyHomeTopBar(
 // ----------------------------
 @Composable
 fun CompanyHomeScreen(
-    jobs: List<TempJobUiItem> = emptyList(),
-    onBack: () -> Unit = {},
-    onEditJob: (String) -> Unit = {},
-    onToggleJobStatus: (String) -> Unit = {},
+    uiState: CompanyHomeUiState,
+    onLogout: () -> Unit = {},
     onDeleteJob: (String) -> Unit = {},
     onViewApplicants: (String) -> Unit = {},
-    onSearchCandidates: () -> Unit = {}, // Updated: Button callback instead of search query
-    onAddJob: () -> Unit = {}
+    onAddJob: () -> Unit = {},
+    onRefresh: () -> Unit = {}
 ) {
 
     Scaffold(
-        topBar = { CompanyHomeTopBar(onBack = onBack) }
+        topBar = { CompanyHomeTopBar(onLogout = onLogout) }
     ) { padding ->
 
         Box(
@@ -99,7 +130,11 @@ fun CompanyHomeScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                if (jobs.isEmpty()) {
+                if (uiState.isLoading) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color(0xFF7B1FD9))
+                    }
+                } else if (uiState.jobs.isEmpty()) {
                     // EMPTY STATE
                     Box(
                         modifier = Modifier
@@ -134,17 +169,25 @@ fun CompanyHomeScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 80.dp)
                     ) {
-                        items(jobs) { job ->
+                        items(uiState.jobs) { job ->
                             JobCard(
                                 job = job,
-                                onEdit = onEditJob,
-                                onToggleStatus = onToggleJobStatus,
                                 onDelete = onDeleteJob,
                                 onViewApplicants = onViewApplicants
                             )
                         }
                     }
                 }
+            }
+
+            // Error Message Toast (Simple Text for now if needed, or Snackbar)
+            if (uiState.errorMessage != null) {
+                 // In a real app, use a SnackbarHost
+                 Text(
+                     text = uiState.errorMessage,
+                     color = Color.Red,
+                     modifier = Modifier.align(Alignment.BottomCenter).padding(80.dp)
+                 )
             }
 
             // ADD BUTTON - Square plus button in bottom right corner
@@ -182,14 +225,10 @@ fun CompanyHomeScreen(
 // ----------------------------
 @Composable
 fun JobCard(
-    job: TempJobUiItem,
-    onEdit: (String) -> Unit,
-    onToggleStatus: (String) -> Unit,
+    job: Job,
     onDelete: (String) -> Unit,
     onViewApplicants: (String) -> Unit
 ) {
-    var menuExpanded by remember { mutableStateOf(false) }
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -198,30 +237,29 @@ fun JobCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-            // Top row: Job title + dropdown menu
+            // Top row: Job title + Delete button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Top
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(job.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = job.title, fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(4.dp))
-                    Text(job.location, fontSize = 14.sp, color = Color.Gray)
-                    job.salary?.let {
+                    Text(text = job.location, fontSize = 14.sp, color = Color.Gray)
+                    if (job.salary.isNotBlank()) {
                         Spacer(Modifier.height(4.dp))
-                        Text("Salary: $it", fontSize = 14.sp, color = Color.Gray)
+                        Text(text = "Salary: ${job.salary}", fontSize = 14.sp, color = Color.Gray)
                     }
                 }
 
                 Button(
-                    onClick = { /* Handle delete action */ },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f)), // Use a distinct color for deletion
-                    // Optional: Use a smaller size or an icon-only button for better fit
+                    onClick = { onDelete(job.id) },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f)),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    modifier = Modifier.height(36.dp)
                 ) {
-                    Text("Delete", color = Color.White)
-                    // You might consider an Icon for a more compact design:
-                    // Icon(Icons.Filled.Delete, contentDescription = "Delete Job", tint = Color.White)
+                    Text("Delete", color = Color.White, fontSize = 12.sp)
                 }
             }
 
@@ -240,31 +278,19 @@ fun JobCard(
 }
 
 // ----------------------------
-// TEMP UI STRUCT FOR PREVIEW
-// ----------------------------
-class TempJobUiItem(
-    val id: String,
-    val title: String,
-    val location: String,
-    val salary: String?,
-    val isActive: Boolean
-)
-
-// ----------------------------
 // PREVIEW
 // ----------------------------
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 fun CompanyHomeScreenPreview() {
     val sampleJobs = listOf(
-        TempJobUiItem("1", "Android Developer", "Cairo", "20k - 30k EGP", true),
-        TempJobUiItem("2", "UI/UX Designer", "Alexandria", null, false),
-        TempJobUiItem("3", "Backend Engineer", "Remote", "25k - 40k EGP", true)
+        Job(id = "1", title = "Android Developer", location = "Cairo", salary = "20k - 30k EGP"),
+        Job(id = "2", title = "UI/UX Designer", location = "Alexandria", salary = ""),
+        Job(id = "3", title = "Backend Engineer", location = "Remote", salary = "25k - 40k EGP")
     )
     CompanyHomeScreen(
-        jobs = sampleJobs,
-        onAddJob = { /* Handle add job click */ },
-        onSearchCandidates = { /* Handle search candidates click */ }
+        uiState = CompanyHomeUiState(jobs = sampleJobs),
+        onAddJob = { /* Handle add job click */ }
     )
 }
 
@@ -272,8 +298,7 @@ fun CompanyHomeScreenPreview() {
 @Composable
 fun CompanyHomeScreenEmptyPreview() {
     CompanyHomeScreen(
-        jobs = emptyList(),
-        onAddJob = { /* Handle add job click */ },
-        onSearchCandidates = { /* Handle search candidates click */ }
+        uiState = CompanyHomeUiState(jobs = emptyList()),
+        onAddJob = { /* Handle add job click */ }
     )
 }

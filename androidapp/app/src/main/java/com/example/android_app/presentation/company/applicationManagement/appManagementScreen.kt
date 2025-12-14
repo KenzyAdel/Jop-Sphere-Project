@@ -53,7 +53,7 @@ fun ApplicationManagementTopBar(
 @Composable
 fun ApplicantCard(
     applicant: TempApplicantUiItem,
-    onViewResume: (String) -> Unit = {},
+    onViewResume: (String?) -> Unit = {},
     onStatusChange: (String, String) -> Unit = { _, _ -> }
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -84,7 +84,7 @@ fun ApplicantCard(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // View Resume button
                 Button(
-                    onClick = { onViewResume(applicant.id) },
+                    onClick = { onViewResume(applicant.portfolio) },
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text("View Resume")
@@ -125,7 +125,7 @@ fun ApplicantCard(
 fun ApplicationManagementScreen(
     applicants: List<TempApplicantUiItem> = emptyList(),
     onBack: () -> Unit = {},
-    onViewResume: (String) -> Unit = {},
+    onViewResume: (String?) -> Unit = {},
     onStatusChange: (String, String) -> Unit = { _, _ -> }
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
