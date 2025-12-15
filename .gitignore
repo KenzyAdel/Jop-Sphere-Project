@@ -41,6 +41,3 @@ flutter_export_environment.sh
 # Local configuration files
 local.properties
 flutter_local_config.sh
-
-# Firebase configuration
-google-services.json
